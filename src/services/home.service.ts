@@ -1119,47 +1119,42 @@ export const updateFeedback = async (req: Request) => {
         const bannerId = await FeedbackData.findOne({ where: [ {id: id },{is_deleted: DeletedStaus.InDeleted}] });
         
         if (bannerId) {
-            let bannerInfo;
-            if(idImage) {
-              
-               bannerInfo = await (FeedbackData.update(
-                {
-                  fullname:fullname,
-                  designation: designation,
-                  feedback:feedback,
-                  modified_date: getLocalDate(),
-                  modified_by: req.body.session_res.id_app_user,
-                  image_id: idImage,
-                  is_video:is_video
-                },
-                { where: { id: id, is_deleted: DeletedStaus.InDeleted }, transaction: trn }
-              ));
-            } else {
-              bannerInfo = await (FeedbackData.update(
-                {
-                  fullname:fullname,
-                  designation: designation,
-                  feedback:feedback,
-                    modified_date: getLocalDate(),
-                    modified_by: req.body.session_res.id_app_user,
-                },
-                { where: { id: id, is_deleted: DeletedStaus.InDeleted }, transaction: trn }
-              ));
-            }
-            if (bannerInfo) {
-                const bannerInformation = await FeedbackData.findOne({ where: [ {id: id },{is_deleted: DeletedStaus.InDeleted}] });
+            
+            let updatePayload: any = {
+                fullname: fullname,
+                designation: designation,
+                feedback: feedback,
+                modified_date: getLocalDate(),
+                modified_by: req.body.session_res.id_app_user,
+            };
 
-              await trn.commit()
-              return resSuccess({data: bannerInformation})
-           
-          } else {
-            await trn.rollback()
-            return resErrorDataExit()
-          }
-        }else {
-            return resNotFound() 
+            if (idImage) {
+                updatePayload.image_id = idImage;
+            }
+
+            if (is_video !== undefined && is_video !== "") {
+                 updatePayload.is_video = is_video;
+            }
+
+            const bannerInfo = await FeedbackData.update(
+                updatePayload,
+                { where: { id: id, is_deleted: DeletedStaus.InDeleted }, transaction: trn }
+            );
+
+            if (bannerInfo) {
+                const bannerInformation = await FeedbackData.findOne({ where: [{ id: id }, { is_deleted: DeletedStaus.InDeleted }], transaction: trn });
+
+                await trn.commit()
+                return resSuccess({ data: bannerInformation })
+
+            } else {
+                await trn.rollback()
+                return resErrorDataExit()
+            }
+        } else {
+            return resNotFound()
         }
-  
+
         await trn.commit()
     
     } catch (error) {

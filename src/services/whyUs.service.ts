@@ -526,53 +526,44 @@ export const updateAward = async (req: Request) => {
         const awardsId = await AwardsData.findOne({ where: [ {id: id },{is_deleted: DeletedStaus.InDeleted}] });
         
         if (awardsId) {
-          const contentExists = await AwardsData.findOne({ where: [ {id: { [Op.ne]: id }},{is_deleted: DeletedStaus.InDeleted}] });
-          
-          if (contentExists != null) {
+            const contentExists = await AwardsData.findOne({ where: [{ id: { [Op.ne]: id } }, { is_deleted: DeletedStaus.InDeleted }] });
 
-            let bannerInfo;
-            if(idImage) {
-              
-               bannerInfo = await (AwardsData.update(
-                {
-                  title: title,
-                  year: year,
-                  modified_date: getLocalDate(),
-                  modified_by: req.body.session_res.id_app_user,
-                  image_id: idImage
-                },
-                { where: { id: id, is_deleted: DeletedStaus.InDeleted }, transaction: trn }
-              ));
-            } else {
-              bannerInfo = await (AwardsData.update(
-                {
+            if (contentExists != null) {
+                let updatePayload: any = {
                     title: title,
                     year: year,
                     modified_date: getLocalDate(),
                     modified_by: req.body.session_res.id_app_user,
-                },
-                { where: { id: id, is_deleted: DeletedStaus.InDeleted }, transaction: trn }
-              ));
-            }
-            if (bannerInfo) {
-                const bannerInformation = await AwardsData.findOne({ where: [ {id: id },{is_deleted: DeletedStaus.InDeleted}] });
+                };
 
-              await trn.commit()
-              return resSuccess({data: bannerInformation})
+                if (idImage) {
+                    updatePayload.image_id = idImage;
+                }
+
+                const bannerInfo = await AwardsData.update(
+                    updatePayload,
+                    { where: { id: id, is_deleted: DeletedStaus.InDeleted }, transaction: trn }
+                );
+
+                if (bannerInfo) {
+                    const bannerInformation = await AwardsData.findOne({ where: [{ id: id }, { is_deleted: DeletedStaus.InDeleted }], transaction: trn });
+
+                    await trn.commit()
+                    return resSuccess({ data: bannerInformation })
+                }
+            } else {
+                await trn.rollback()
+                return resNotFound()
             }
-          } else {
-            await trn.rollback()
+        } else {
             return resNotFound()
-          }
-        }else {
-            return resNotFound() 
         }
-  
+
         await trn.commit()
-    
+
     } catch (error) {
         await trn.rollback()
-        throw(error);
+        throw (error);
     }
 
 }
@@ -899,57 +890,52 @@ export const updateWhyUsFeatures = async (req: Request) => {
           idicon = imageResult.dataValues.id;
       }
 
-        const awardsId = await WhyUsFeaturesData.findOne({ where: [ {id: id },{is_deleted: DeletedStaus.InDeleted}] });
-        
-        if (awardsId) {
-          const contentExists = await WhyUsFeaturesData.findOne({ where: [ {id: { [Op.ne]: id }},{is_deleted: DeletedStaus.InDeleted}] });
-          
-          if (contentExists != null) {
+        const awardsId = await WhyUsFeaturesData.findOne({ where: [{ id: id }, { is_deleted: DeletedStaus.InDeleted }] });
 
-            let bannerInfo;
-            if(idImage && idicon) {
-              
-               bannerInfo = await (WhyUsFeaturesData.update(
-                {
-                  title: title,
-                  description: description,
-                  icon_id:idicon,
-                  modified_date: getLocalDate(),
-                  modified_by: req.body.session_res.id_app_user,
-                  image_id: idImage
-                },
-                { where: { id: id, is_deleted: DeletedStaus.InDeleted }, transaction: trn }
-              ));
-            } else {
-              bannerInfo = await (WhyUsFeaturesData.update(
-                {
+        if (awardsId) {
+            const contentExists = await WhyUsFeaturesData.findOne({ where: [{ id: { [Op.ne]: id } }, { is_deleted: DeletedStaus.InDeleted }] });
+
+            if (contentExists != null) {
+
+                let updatePayload: any = {
                     title: title,
                     description: description,
                     modified_date: getLocalDate(),
                     modified_by: req.body.session_res.id_app_user,
-                },
-                { where: { id: id, is_deleted: DeletedStaus.InDeleted }, transaction: trn }
-              ));
-            }
-            if (bannerInfo) {
-                const information = await WhyUsFeaturesData.findOne({ where: [ {id: id },{is_deleted: DeletedStaus.InDeleted}] });
+                };
 
-              await trn.commit()
-              return resSuccess({data: information})
+                if (idImage) {
+                    updatePayload.image_id = idImage;
+                }
+                if (idicon) {
+                    updatePayload.icon_id = idicon;
+                }
+
+
+                const  bannerInfo = await WhyUsFeaturesData.update(
+                    updatePayload,
+                    { where: { id: id, is_deleted: DeletedStaus.InDeleted }, transaction: trn }
+                );
+                
+                if (bannerInfo) {
+                    const information = await WhyUsFeaturesData.findOne({ where: [{ id: id }, { is_deleted: DeletedStaus.InDeleted }], transaction: trn });
+
+                    await trn.commit()
+                    return resSuccess({ data: information })
+                }
+            } else {
+                await trn.rollback()
+                return resNotFound()
             }
-          } else {
-            await trn.rollback()
+        } else {
             return resNotFound()
-          }
-        }else {
-            return resNotFound() 
         }
-  
+
         await trn.commit()
-    
+
     } catch (error) {
         await trn.rollback()
-        throw(error);
+        throw (error);
     }
 
 }

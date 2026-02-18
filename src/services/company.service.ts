@@ -208,10 +208,11 @@ export const deleteCompanyCountInfo = async (req: Request) => {
   ////////////////////// Company info //////////////////////
 
   export const addCompanyInfo = async (req: Request) => {
+    const trn = await dbContext.transaction();
     try {
       const { company_name,company_email, company_phone ,brochure_name,brochure_links,address,sort_description,copyright,office_time,map_link,web_link,facebook_link,insta_link,youtube_link,linkdln_link,twitter_link,mission,vision,about_company,owner_description,welcome_text} = req.body
 
-      const trn = await dbContext.transaction();
+
 
       var files = req.files as any;
       let logoWhite = files.logo_white;
@@ -387,10 +388,12 @@ export const deleteCompanyCountInfo = async (req: Request) => {
         brochure_file_id:idbrochureFile,
       }
       
-      await CompanyInfo.create(payload)
+      await CompanyInfo.create(payload, { transaction: trn })
+      await trn.commit();
       return resSuccess({ data: payload });
 
   } catch (error) {
+    await trn.rollback();
     throw (error)
   }
 }
@@ -717,10 +720,10 @@ if (logoWhite) {
         ...(idaboutImage != null && { about_image_id: idaboutImage }), // Corrected if condition
         ...(idbrochureFile != null && { brochure_file_id: idbrochureFile }), // Corrected if condition
       },
-      { where: { id: id, is_deleted: DeletedStaus.InDeleted }}
+      { where: { id: id, is_deleted: DeletedStaus.InDeleted }, transaction: trn }
     );
     
-    const shapesInformation = await CompanyInfo.findOne({ where: [{ id: id }, { is_deleted: DeletedStaus.InDeleted }] });
+    const shapesInformation = await CompanyInfo.findOne({ where: [{ id: id }, { is_deleted: DeletedStaus.InDeleted }], transaction: trn });
     await trn.commit()
     return resSuccess({ data: shapesInformation })
 
