@@ -1,0 +1,7 @@
+
+private/
+node_modules/
+build/
+environment/
+yarn.lock
+.env
