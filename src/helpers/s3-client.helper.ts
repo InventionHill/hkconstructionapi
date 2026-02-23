@@ -24,7 +24,7 @@ const S3 = new S3Client({
     accessKeyId: S3_ACCESS_KEY_ID,
     secretAccessKey: S3_SECRET_ACCESS_KEY,
   },
-});
+} as any);
 
 enum S3ServiceMethods {
   PutObjectCommand = 1,
@@ -49,7 +49,7 @@ export const s3UploadObject = async (
   path: string,
   mimetype: string
 ) => {
-  
+
   const payload = {
     Bucket: S3_BUCKET_NAME,
     Key: path,
@@ -81,7 +81,7 @@ export const s3GetImageObject = async (key: string) => {
     S3ServiceMethods.GetObjectCommand,
     payload
   );
-  if(result.code !== DEFAULT_STATUS_CODE_SUCCESS){
+  if (result.code !== DEFAULT_STATUS_CODE_SUCCESS) {
     return result
   }
   const img = await Buffer.from(await streamToString(result.Body), "base64");

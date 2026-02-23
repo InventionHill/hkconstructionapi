@@ -1,4 +1,15 @@
-require("dotenv").config({ path: "environment/env." + process.env.NODE_ENV });
+const path = require('path');
+const dotenv = require('dotenv');
+console.log('Current working directory:', process.cwd());
+console.log('Loading .env from:', path.resolve(process.cwd(), '.env'));
+const result = dotenv.config({ path: path.resolve(process.cwd(), '.env'), override: true });
+if (result.error) {
+  console.error('Error loading .env:', result.error);
+} else {
+  console.log('.env loaded successfully');
+  console.log('Parsed DB_HOST:', result.parsed?.DB_HOST);
+}
+console.log('Final process.env.DB_HOST:', process.env.DB_HOST);
 
 export const PROCESS_ENVIRONMENT =
   process.env.PROCESS_ENVIRONMENT || "development";
@@ -9,8 +20,8 @@ export const SECURE_COMMUNICATION = process.env.SECURE_COMMUNICATION
 export const PUBLIC_AUTHORIZATION_TOKEN =
   process.env.PUBLIC_AUTHORIZATION_TOKEN || "PUBLIC_AUTHORIZATION_TOKEN";
 
-  export const DB_NAME = process.env.DB_NAME || "hk_construction";
-  export const DB_USER_NAME = process.env.DB_USER_NAME || "hk-construction";
+export const DB_NAME = process.env.DB_NAME || "hk_construction";
+export const DB_USER_NAME = process.env.DB_USER_NAME || "hk-construction";
 export const DB_PASSWORD = process.env.DB_PASSWORD || "";
 export const DB_HOST = process.env.DB_HOST || "localhost";
 export const DB_PORT = process.env.DB_PORT || 5432;
@@ -39,7 +50,7 @@ export const S3_SECRET_ACCESS_KEY = process.env.S3_SECRET_ACCESS_KEY || "";
 // crypto-js
 export const CRYPTO_JS_KEY = process.env.CRYPTO_JS_KEY || "";
 export const CRYPTO_JS_IV = process.env.CRYPTO_JS_IV || "";
-  
+
 // Mail
 // SMTP
 export const MAIL_USER_NAME = process.env.MAIL_USER_NAME || "";
@@ -82,21 +93,21 @@ export const INVOICE_NUMBER_DIGIT = 6;
 // Product Bulk Upload File
 export const PRODUCT_BULK_UPLOAD_FILE_MIMETYPE =
   process.env.PRODUCT_BULK_UPLOAD_FILE_MIMETYPE || "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-  export const PRODUCT_BULK_UPLOAD_ZIP_MIMETYPE =
+export const PRODUCT_BULK_UPLOAD_ZIP_MIMETYPE =
   process.env.PRODUCT_BULK_UPLOAD_ZIP_MIMETYPE || "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-  export const PRODUCT_BULK_UPLOAD_FILE_SIZE = process.env
+export const PRODUCT_BULK_UPLOAD_FILE_SIZE = process.env
   .PRODUCT_BULK_UPLOAD_FILE_SIZE
   ? Number(process.env.PRODUCT_BULK_UPLOAD_FILE_SIZE)
   : 10;
-  export const PRODUCT_BULK_UPLOAD_ZIP_SIZE = process.env
+export const PRODUCT_BULK_UPLOAD_ZIP_SIZE = process.env
   .PRODUCT_BULK_UPLOAD_ZIP_SIZE
   ? Number(process.env.PRODUCT_BULK_UPLOAD_ZIP_SIZE)
   : 10;
 export const PRODUCT_BULK_UPLOAD_BATCH_SIZE =
   process.env.PRODUCT_BULK_UPLOAD_BATCH_SIZE || 500;
 
-  // payment secret key
+// payment secret key
 
 export const PAYMENT_METHOD_SECRET_KEY = process.env.PAYMENT_METHOD_SECRET_KEY || "";
 

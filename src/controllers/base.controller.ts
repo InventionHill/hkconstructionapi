@@ -18,35 +18,62 @@ export async function callServiceMethod(
 ) {
   const requestTime = getLocalDate();
   let response;
+
   try {
     const data = await serviceMethodTocall;
+
+    const successStatus =
+      typeof data?.code === "number"
+        ? data.code
+        : DEFAULT_STATUS_CODE_SUCCESS;
+
     response = {
-      status: data?.code ? data.code : DEFAULT_STATUS_CODE_SUCCESS,
+      status: successStatus,
       data: data ? data : null,
     };
   } catch (err: any) {
+    console.error("API Error:", err);
+
+    const statusCode =
+      typeof err?.code === "number"
+        ? err.code
+        : DEFAULT_STATUS_CODE_ERROR;
+
     response = {
-      status: err.code ? err.code : DEFAULT_STATUS_CODE_ERROR,
+      status: statusCode,
       data: {
-        code: err.code ? err.code : DEFAULT_STATUS_CODE_ERROR,
-        message: err.message ? err.message : UNKNOWN_ERROR_TRY_AGAIN,
-        status: err.status ? err.status : DEFAULT_STATUS_ERROR,
-        data: err.data && typeof err != "object" ? parseData(err) : null,
+        code: statusCode,
+        message: err?.message
+          ? err.message
+          : UNKNOWN_ERROR_TRY_AGAIN,
+        status: err?.status
+          ? err.status
+          : DEFAULT_STATUS_ERROR,
+        data:
+          err?.data && typeof err !== "object"
+            ? parseData(err)
+            : null,
       },
     };
   }
 
-  saveServerLogs({
-    requestTime,
-    url: req.originalUrl,
-    action: actionName,
-    body: req.body,
-    responseTime: getLocalDate(),
-    response: response.data,
-  });
+  // Save logs safely
+  try {
+    saveServerLogs({
+      requestTime,
+      url: req.originalUrl,
+      action: actionName,
+      body: req.body,
+      responseTime: getLocalDate(),
+      response: response?.data,
+    });
+  } catch (logError) {
+    console.error("Log error:", logError);
+  }
 
   const encodedResponse = SECURE_COMMUNICATION
     ? encryptResData(response.data)
     : response.data;
+
   return res.status(response.status).send(encodedResponse);
 }
