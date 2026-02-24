@@ -49,14 +49,15 @@ jobs:
             echo "🏗️ Building project..."
             npm run build
 
-            echo "🛑 Stopping backend if running..."
-            pm2 delete hk-api || true
+            echo "🚀 Starting or Restarting backend..."
 
-            echo "⏳ Waiting..."
-            sleep 3
-
-            echo "🚀 Starting backend..."
+            if pm2 describe hk-api > /dev/null; then
+              echo "♻️ Process exists. Restarting..."
+              pm2 restart hk-api
+            else
+            echo "🆕 Process not found. Starting new one..."
             pm2 start build/index.js --name hk-api
+            fi
 
             echo "💾 Saving PM2..."
             pm2 save
