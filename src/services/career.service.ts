@@ -263,10 +263,11 @@ export const addCareerReq = async (req: Request) => {
       }
   
       await CareerReqData.create(payload)
-      trn.commit();
+      await trn.commit();
       return resSuccess({ data: payload });
 
     } catch (error) {     
+      await trn.rollback();
       throw (error)
     }
   }

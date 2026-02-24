@@ -170,46 +170,47 @@ export const addBuilder = async (req: Request) => {
       const builderId = await Builders.findOne({ where: [{ id: id }, { is_deleted: DeletedStaus.InDeleted }] });
   
       if (builderId) {
-        if (idImage) {
-          const builderNameExists = await Builders.findOne({ where: [columnValueLowerCase('builder_name', name), { id: { [Op.ne]: id } }, { is_deleted: DeletedStaus.InDeleted }] });
-          if (builderNameExists == null) {
-            let builderInfo;
-            if (idImage) {
-              builderInfo = await (Builders.update(
-                {
+        const builderNameExists = await Builders.findOne({ where: [columnValueLowerCase('builder_name', builder_name), { id: { [Op.ne]: id } }, { is_deleted: DeletedStaus.InDeleted }] });
+        if (builderNameExists == null) {
+          let builderInfo;
+          if (idImage) {
+            builderInfo = await (Builders.update(
+              {
+                builder_name: builder_name,
+                modified_date: getLocalDate(),
+                modified_by: req.body.session_res.id_app_user,
+                id_image: idImage,
+              },
+              { where: { id: id, is_deleted: DeletedStaus.InDeleted }, transaction: trn }
+            ));
+          } else {
+            builderInfo = await (Builders.update(
+              {
                   builder_name: builder_name,
                   modified_date: getLocalDate(),
-                  modified_by: req.body.session_res.id_app_user,
-                  id_image: idImage,
-                },
-                { where: { id: id, is_deleted: DeletedStaus.InDeleted }, transaction: trn }
-              ));
-            } else {
-              builderInfo = await (Builders.update(
-                {
-                    builder_name: builder_name,
-                    modified_date: getLocalDate(),
-                  modified_by: req.body.session_res.id_app_user,
-                },
-                { where: { id: id, is_deleted: DeletedStaus.InDeleted }, transaction: trn }
-              ));
-            }
-  
-            if (builderInfo) {
-              const builderInformation = await Builders.findOne({ where: [{ id: id }, { is_deleted: DeletedStaus.InDeleted }] });
-  
-              await trn.commit()
-              return resSuccess({ data: builderInformation })
-            }
+                modified_by: req.body.session_res.id_app_user,
+              },
+              { where: { id: id, is_deleted: DeletedStaus.InDeleted }, transaction: trn }
+            ));
+          }
+
+          if (builderInfo) {
+            const builderInformation = await Builders.findOne({ where: [{ id: id }, { is_deleted: DeletedStaus.InDeleted }], transaction: trn });
+
+            await trn.commit()
+            return resSuccess({ data: builderInformation })
           } else {
             await trn.rollback()
-            return resErrorDataExit()
+            return resErrorDataExit();
           }
+        } else {
+          await trn.rollback()
+          return resErrorDataExit()
         }
       } else {
+        await trn.rollback()
         return resNotFound()
       }
-      await trn.commit()
   
     } catch (error) {
       await trn.rollback()

@@ -1157,6 +1157,7 @@ export const updateFeedback = async (req: Request) => {
         return resErrorDataExit()
       }
     } else {
+      await trn.rollback()
       return resNotFound()
     }
 
@@ -1483,6 +1484,7 @@ export const updateGroupOfCompany = async (req: Request) => {
         return resErrorDataExit()
       }
     } else {
+      await trn.rollback()
       return resNotFound()
     }
 
@@ -1778,6 +1780,7 @@ export const updateSolarPlan = async (req: Request) => {
         return resErrorDataExit()
       }
     } else {
+      await trn.rollback()
       return resNotFound()
     }
 

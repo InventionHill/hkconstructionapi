@@ -728,12 +728,11 @@ if (logoWhite) {
     return resSuccess({ data: shapesInformation })
 
   } else {
+    await trn.rollback()
     return resNotFound()
   }
-  await trn.commit()
-
 } catch (error) {
-  await trn.commit()
+  await trn.rollback()
   throw (error);
 }
 } 
