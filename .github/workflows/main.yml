@@ -27,11 +27,10 @@ jobs:
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             nvm use ${{ vars.NODE_VERSION }}
 
-            # Define project path
             PROJECT_DIR="/home/${{ secrets.VPS_USER }}/public_html/hkconstructionapi"
 
             if [ ! -d "$PROJECT_DIR" ]; then
-              echo "❌ Error: Project directory $PROJECT_DIR does not exist!"
+              echo "❌ Error: Project directory $PROJECT_DIR does not exist  !"
               exit 1
             fi
 
@@ -44,31 +43,23 @@ jobs:
             echo "📦 Installing dependencies..."
             npm install
 
+            echo "🧹 Cleaning old build..."
+            rm -rf build
+
             echo "🏗️ Building project..."
             npm run build
 
             echo "🛑 Stopping backend if running..."
-            pm2 stop hk-api || true
+            pm2 delete hk-api || true
 
-            echo "⏳ Waiting for old connections to close..."
-            sleep 5
+            echo "⏳ Waiting..."
+            sleep 3
 
-            echo "🧹 Checking for any leftover process using port 3535..."
-            PID=$(lsof -t -i :3535 || true)
-            if [ -n "$PID" ]; then
-              echo "⚠️ Found process on port 3535 (PID: $PID). Killing it..."
-              kill -9 $PID || true
-              sleep 2
-            else
-              echo "✅ Port 3535 is free."
-            fi
+            echo "🚀 Starting backend..."
+            pm2 start build/index.js --name hk-api
 
-            echo "🚀 Starting backend cleanly..."
-            # pm2 start build/index.js --name "hk-api"
-            pm2 start ecosystem.config.js
-
-            echo "💾 Saving PM2 process list..."
+            echo "💾 Saving PM2..."
             pm2 save
 
-            echo "✅ Deployment complete!"
+echo "✅ Deployment complete!"
 
